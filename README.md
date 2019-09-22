@@ -7,6 +7,7 @@ Blood crisis has been a serious issue in the United States. Recently, American R
 Given the short shelf life of blood (~40 days) and the storage conditions required to keep it intact (~40F), it becomes a difficult task to manage blood samples even if there is an increase in the amount of donors. 
 
 Solution:
+
     In order to address this issue, we built an application that would make it easier for hospitals or blood banks to locate potential donors at times of emergency. 
   
 Methodology:
@@ -18,7 +19,7 @@ Technologies used:
   1. Front-end:
         ESRI ArcGIS
   2. Back-end:
-        Django, SQLite
+        Django, SQLite, AWS EC2
   3. Data Science:
         NumPy, Pandas, Scikit-learn
     
