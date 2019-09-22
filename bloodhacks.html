@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>Blood Donor Finder</title>
+
+    <style>
+        html,
+        body {
+            margin: 1;
+            height: 100%;
+            width: 100%;
+            float: left;
+            font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+            color: darkred;
+            background-color: black;
+        }
+        
+        .view {
+            padding-right: 20px;
+            margin: 1;
+            height: 100%;
+            width: 75%;
+            float: left;
+        }
+        
+        #result {
+            padding-left: 10px;
+            float: left;
+            width: 300px;
+        }
+        
+        ul {
+            list-style-type: none;
+            padding: 0;
+            border: 1px solid #ddd;
+        }
+        
+        ul li {
+            padding: 8px 16px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        ul li:last-child {
+            border-bottom: none
+        }
+    </style>
+
+    <link rel="stylesheet" href="https://js.arcgis.com/4.12/esri/themes/light/main.css" />
+    <script src="https://js.arcgis.com/4.12/"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDaQi5CtZ2h7tpjGtphKccNLtFaYEiSo3E"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+    ​
+    <script>
+        navigator.geolocation.getCurrentPosition(success, fail);
+        var lgt = -118.80500;
+        var lat = 34.02700;
+
+        function success(position) {
+            lgt = position.coords.longitude;
+            lat = position.coords.latitude;
+            //render_map(lgt, lat);
+        }
+
+        function fail() {
+            //render_map(lgt, lat)
+        }
+        $(document).ready(function() {
+
+            $("input[type='radio']").click(function() {
+                displayRadioValue();
+            });
+
+        });
+
+        function displayRadioValue() {
+            var ele = document.getElementsByName('gender');
+            for (i = 0; i < ele.length; i++) {
+                if (ele[i].checked)
+                    var temp = (ele[i].value);
+            }
+            $('#result').empty();
+            another_function(encodeURIComponent(temp));
+            var url = "http://ec2-34-214-254-41.us-west-2.compute.amazonaws.com:8080/test/?blood_group=" + encodeURIComponent(temp)
+            $.ajax({
+                url: url,
+                success: function(data) {
+                    //$( '#target' ).html( 'Results: ' + resp.results.length );
+                    console.log(data['features'])
+                    var dict = []
+                    for (i = 0; i < data['features'].length; i++) {
+                        //console.log(data['features'][i]['geometry']['coordinates'])
+                        var dic = [];
+                        dic.push(Math.sqrt(Math.pow(data["features"][i]['geometry']['coordinates'][1] - lat, 2) + Math.pow(data["features"][i]['geometry']['coordinates'][0] - lgt, 2)));
+                        dic.push(data["features"][i]["properties"]["Phone"]);
+                        dic.push(data["features"][i]["properties"]["Name"]);
+                        dict.push(dic);
+                    }
+                    dict.sort();
+                    var element = document.createElement("h4");
+                    var node = document.createTextNode("Top 10 potential donors in the neighborhood:");
+                    element.appendChild(node);
+                    var para = document.getElementById("result");
+                    para.appendChild(element);
+                    console.log(dict);
+                    for (i = 0; i < 10; i++) {
+                        var element = document.getElementById("result");
+                        var para = document.createElement("ul");
+                        var att = document.createAttribute("class"); // Create a "class" attribute
+                        att.value = i; // Set the value of the class attribute
+                        para.setAttributeNode(att)
+                        element.appendChild(para)
+                        dict[i].reverse();
+                        for (j = 0; j < dict[0].length - 1; j++) {
+                            var para = document.createElement("li");
+                            var node = document.createTextNode(dict[i][j]);
+                            para.appendChild(node);
+
+                            var element = document.getElementsByClassName(i)[0];
+                            element.appendChild(para);
+                        }
+                    }
+                },
+                error: function(error) {
+                    console.log(error)
+                }
+            });
+
+
+
+            function another_function(bloodgroup) {
+                render_map(lgt, lat)
+
+                function render_map(lgt, lat) {
+                    require([
+                        "esri/Map",
+                        "esri/layers/GeoJSONLayer",
+                        "esri/views/MapView",
+                        "esri/widgets/Locate"
+                    ], function(Map, GeoJSONLayer, MapView, Locate) {
+                        // If GeoJSON files are not on the same domain as your website, a CORS enabled server
+                        // or a proxy is required.
+                        const url =
+                            "http://ec2-34-214-254-41.us-west-2.compute.amazonaws.com:8080/test/?blood_group=" + bloodgroup;
+
+                        // Paste the url into a browser's address bar to download and view the attributes
+                        // in the GeoJSON file. These attributes include:
+                        // * mag - magnitude
+                        // * type - earthquake or other event such as nuclear test
+                        // * place - location of the event
+                        // * time - the time of the event
+                        // Use the Arcade Date() function to format time field into a human-readable format
+
+                        const template = {
+                            title: "{name}",
+                            content: "Blood Group: {BloodGroup}, Contact: {Phone}"
+                        };
+
+                        const renderer = {
+                            type: "simple",
+                            field: "mag",
+                            symbol: {
+                                type: "simple-marker",
+                                color: "red",
+                                outline: {
+                                    color: "white"
+                                }
+                            }
+                        };
+
+                        const geojsonLayer = new GeoJSONLayer({
+                            url: url,
+                            copyright: "Blood Hacks",
+                            popupTemplate: template,
+                            renderer: renderer //optional
+                        });
+
+                        const map = new Map({
+                            basemap: "streets-navigation-vector",
+                            layers: [geojsonLayer]
+                        });
+
+                        const view = new MapView({
+                            container: "viewDiv",
+                            center: [lgt, lat],
+                            zoom: 11,
+                            map: map
+                        });
+                        const locate = new Locate({
+                            view: view,
+                            useHeadingEnabled: false,
+                            goToOverride: function(view, options) {
+                                options.target.scale = 150000; // Override the default map scale
+                                return view.goTo(options.target);
+                            }
+                        });
+
+                        view.ui.add(locate, "top-left");
+
+                    });
+                }
+            }
+        };
+    </script>
+</head>
+
+<body>
+    <h1 align="center">Blood Donor Locator</h1>
+    <h3 align="center">Finding potential blood donors in the vicinity during an emergency</h3>
+    <div> Select the Blood Group:
+        <input type="radio" name="gender" value="A+" />A+
+        <input type="radio" name="gender" value="A-" />A-
+        <input type="radio" name="gender" value="B+" />B+
+        <input type="radio" name="gender" value="B-" />B-
+        <input type="radio" name="gender" value="O+" />O+
+        <input type="radio" name="gender" value="O-" />O-
+        <input type="radio" name="gender" value="AB+" />AB+
+        <input type="radio" name="gender" value="AB-" />AB-
+    </div>
+    <div id="viewDiv" class="view"></div>
+    <div id="result">
+
+    </div>
+</body>
+
+</html>
