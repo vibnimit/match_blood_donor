@@ -20,7 +20,7 @@ def test_method(request):
     return HttpResponse("Text only, please.", content_type="text/plain")
 
 def createGeoJson(records):
-    dict = {"features":[],"metadata":[]}
+    dict = {"type":"FeatureCollection","features":[],"metadata":[]}
     records_json = json.loads(records)
     for row in records_json:
         prop = {
@@ -31,10 +31,10 @@ def createGeoJson(records):
 
         geometry = {
             "type":"Point",
-            "coordinates":[row['fields']['longitude'], row['fields']['latitude']]
+            "coordinates":[float(row['fields']['longitude']), float(row['fields']['latitude'])]
         }
 
-        rec_dicts = {"properties":prop,"geometry":geometry}
+        rec_dicts = {"type":"Feature","properties":prop,"geometry":geometry}
 
         dict["features"].append(rec_dicts)
     return dict
