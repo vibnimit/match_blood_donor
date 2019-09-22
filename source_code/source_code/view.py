@@ -1,6 +1,5 @@
 from django.http import HttpResponse
 
-
 def test_method(request):
     print(request.__dict__)
 
