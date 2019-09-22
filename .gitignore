@@ -102,3 +102,7 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+source_code/venv/*
+source_code/.idea/*
+.idea/*
