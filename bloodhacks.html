@@ -14,10 +14,22 @@
             width: 100%;
             float: left;
             font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-            color: darkred;
-            background-color: black;
+            color: #b2311c;
+            background-color: #cfd6e7;
         }
-        
+
+        .radio_btn{
+            padding-bottom: 15px;
+            /*text-align: center;*/
+            padding-left: 250px;
+        }
+
+        #viewDiv{
+            height: 600px;
+            border-style: solid;
+            border-color: black;
+        }
+
         .view {
             padding-right: 20px;
             margin: 1;
@@ -25,22 +37,39 @@
             width: 75%;
             float: left;
         }
-        
+
+        .ico:before{
+    content: '';
+    display: flex;
+    height: 20px;  /*height of icon */
+    width: 20px;  /*width of icon */
+    /*position: absolute;*/
+      /*where to replace the icon */
+    top: 0px;
+   float: left;
+    padding-right: 10px;
+
+      /*background */
+    background: url(msg.png) no-repeat 0px 0px;
+}
+
         #result {
             padding-left: 10px;
             float: left;
             width: 300px;
+            height: 600px;
+            overflow: auto;
         }
         
         ul {
             list-style-type: none;
             padding: 0;
-            border: 1px solid #ddd;
+            border: 1px solid #000000;
         }
         
         ul li {
             padding: 8px 16px;
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid #000000;
         }
         
         ul li:last-child {
@@ -111,16 +140,23 @@
                         var att = document.createAttribute("class"); // Create a "class" attribute
                         att.value = i; // Set the value of the class attribute
                         para.setAttributeNode(att)
+                        // para.setAttribute("class","ic")
                         element.appendChild(para)
                         dict[i].reverse();
                         for (j = 0; j < dict[0].length - 1; j++) {
-                            var para = document.createElement("li");
+                            var spa = document.createElement("span")
+                            var para_l = document.createElement("li");
                             var node = document.createTextNode(dict[i][j]);
-                            para.appendChild(node);
-
+                            if(j==1){
+                             para_l.appendChild(spa)
+                            }
+                            para_l.appendChild(node);
+                            spa.setAttribute("class","ico")
                             var element = document.getElementsByClassName(i)[0];
-                            element.appendChild(para);
+                            element.appendChild(para_l);
+
                         }
+
                     }
                 },
                 error: function(error) {
@@ -178,7 +214,7 @@
                         });
 
                         const map = new Map({
-                            basemap: "streets-navigation-vector",
+                            basemap: "streets-vector",
                             layers: [geojsonLayer]
                         });
 
@@ -209,7 +245,7 @@
 <body>
     <h1 align="center">Blood Donor Locator</h1>
     <h3 align="center">Finding potential blood donors in the vicinity during an emergency</h3>
-    <div> Select the Blood Group:
+    <div class="radio_btn"> Select the Blood Group:
         <input type="radio" name="gender" value="A+" />A+
         <input type="radio" name="gender" value="A-" />A-
         <input type="radio" name="gender" value="B+" />B+
